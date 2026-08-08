@@ -69,10 +69,16 @@ function chrome(base) {
   ${nav(base)}`;
 }
 
-function campaignImage(src, label, base, className = "", eager = false) {
-  return `<figure class="campaign-image ${className}" data-image-placeholder>
-    <img src="${esc(imageSrc(src, base))}" alt="" loading="${eager ? "eager" : "lazy"}" decoding="async">
-    <figcaption><span>${esc(label)}</span><span>Image placeholder · replace in project data</span></figcaption>
+function campaignImage(image, fallbackLabel, base, className = "", eager = false) {
+  const media = typeof image === "string" ? { src: image } : image;
+  const { src } = media;
+  const label = media.label ?? fallbackLabel;
+  const isPlaceholder = /^https:\/\/picsum\.photos\//.test(src);
+  const status = media.caption ?? (isPlaceholder ? "Image placeholder · replace in project data" : "Original project image");
+  const alt = media.alt ?? (isPlaceholder ? "" : label);
+  return `<figure class="campaign-image ${className}"${isPlaceholder ? " data-image-placeholder" : ""}>
+    <img src="${esc(imageSrc(src, base))}" alt="${esc(alt)}" loading="${eager ? "eager" : "lazy"}" decoding="async">
+    <figcaption><span>${esc(label)}</span><span>${esc(status)}</span></figcaption>
   </figure>`;
 }
 

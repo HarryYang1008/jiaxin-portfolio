@@ -4,6 +4,13 @@ export type StorySection = {
   body: string;
 };
 
+export type ProjectImage = string | {
+  src: string;
+  label?: string;
+  caption?: string;
+  alt?: string;
+};
+
 export type Project = {
   slug: string;
   title: string;
@@ -15,7 +22,7 @@ export type Project = {
   client: string;
   tags: string[];
   canvaUrl: string;
-  images: string[];
+  images: ProjectImage[];
   featured: boolean;
   index: string;
   visual: "word" | "terrain" | "signal" | "field";
@@ -84,7 +91,22 @@ export const projects: Project[] = [
     client: "LEGO × National Parks",
     tags: ["Integrated", "Social", "Experience", "OOH"],
     canvaUrl: "https://canva.link/dfd2z6es16kn7ow",
-    images: placeholderImages("lego-national-parks"),
+    images: [
+      {
+        src: "media/lego-national-parks/lego1.png",
+        label: "LEGO × National Parks · Trash Bin",
+      },
+      {
+        src: "media/lego-national-parks/lego2.png",
+        label: "LEGO × National Parks · Merchandise",
+        caption: "Related merchandise yields a stronger promotional effect",
+      },
+      {
+        src: "media/lego-national-parks/lego3.png",
+        label: "LEGO × National Parks · Rebuild With Imagination",
+        caption: "Grand National Park",
+      },
+    ],
     featured: true,
     index: "02",
     visual: "terrain",
