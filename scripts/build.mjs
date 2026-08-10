@@ -69,13 +69,18 @@ function chrome(base) {
   ${nav(base)}`;
 }
 
-function campaignImage(image, fallbackLabel, base, className = "", eager = false) {
+function imageData(image, fallbackLabel) {
   const media = typeof image === "string" ? { src: image } : image;
-  const { src } = media;
   const label = media.label ?? fallbackLabel;
+  return { ...media, label, alt: media.alt ?? label };
+}
+
+function campaignImage(image, fallbackLabel, base, className = "", eager = false) {
+  const media = imageData(image, fallbackLabel);
+  const { src, label } = media;
   const isPlaceholder = /^https:\/\/picsum\.photos\//.test(src);
   const status = media.caption ?? (isPlaceholder ? "Image placeholder · replace in project data" : "Original project image");
-  const alt = media.alt ?? (isPlaceholder ? "" : label);
+  const alt = isPlaceholder ? "" : media.alt;
   return `<figure class="campaign-image ${className}"${isPlaceholder ? " data-image-placeholder" : ""}>
     <img src="${esc(imageSrc(src, base))}" alt="${esc(alt)}" loading="${eager ? "eager" : "lazy"}" decoding="async">
     <figcaption><span>${esc(label)}</span><span>${esc(status)}</span></figcaption>
@@ -143,8 +148,11 @@ function homePage() {
 }
 
 function archivePage() {
-  const list = projects.map((project) => `<article><a href="../work/${project.slug}/index.html"><span class="archive-index">${project.index}</span><h2>${esc(project.title)}</h2><span>${esc(project.category)}</span><span>${esc(project.year ?? "Source study")}</span><b aria-hidden="true">↗</b></a></article>`).join("");
-  const body = `<main class="archive-page"><header class="archive-hero"><div class="eyebrow">Campaign index / ${projects.length} projects</div><h1>Every idea<br>leaves a trace.</h1><p>A living archive of campaigns, scripts, strategy and visual systems. The first projects have been edited into full stories; the rest remain linked to their original source presentations.</p></header><section class="archive-list">${list}</section><footer class="archive-footer"><a href="../index.html">← Return to the story</a><a href="mailto:jiaxinz0620@gmail.com">Start a conversation ↗</a></footer></main>`;
+  const list = projects.map((project) => {
+    const preview = imageData(project.images[0], `${project.title} · Archive preview`);
+    return `<article><a href="../work/${project.slug}/index.html"><span class="archive-index">${project.index}</span><span class="archive-thumb"><img src="${esc(imageSrc(preview.src, "../"))}" alt="${esc(preview.alt)}" loading="lazy" decoding="async"></span><h2>${esc(project.title)}</h2><span class="archive-category">${esc(project.category)}</span><span class="archive-year">${esc(project.year ?? "Selected work")}</span><b aria-hidden="true">↗</b></a></article>`;
+  }).join("");
+  const body = `<main class="archive-page"><header class="archive-hero"><div class="eyebrow">Campaign index / ${projects.length} projects</div><h1>Every idea<br>leaves a trace.</h1><p>A living archive of campaigns, scripts, research, strategy and visual systems—each rebuilt from its original project presentation into a complete story.</p></header><section class="archive-list">${list}</section><footer class="archive-footer"><a href="../index.html">← Return to the story</a><a href="mailto:jiaxinz0620@gmail.com">Start a conversation ↗</a></footer></main>`;
   return pageShell({ title: "Campaign Archive — Jiaxin Zhang", description: "Selected campaign, strategy, writing and design work by Jiaxin Zhang.", base: "../", bodyClass: "archive-static", body });
 }
 
