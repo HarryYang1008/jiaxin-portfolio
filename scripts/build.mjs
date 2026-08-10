@@ -25,6 +25,8 @@ fs.copyFileSync(path.join(srcDir, "styles.css"), path.join(outDir, "assets", "st
 fs.copyFileSync(path.join(root, "scripts", "motion.js"), path.join(outDir, "assets", "motion.js"));
 const mediaDir = path.join(srcDir, "media");
 if (fs.existsSync(mediaDir)) fs.cpSync(mediaDir, path.join(outDir, "assets", "media"), { recursive: true });
+const pdfDir = path.join(srcDir, "pdfs");
+if (fs.existsSync(pdfDir)) fs.cpSync(pdfDir, path.join(outDir, "assets", "pdfs"), { recursive: true });
 fs.writeFileSync(path.join(outDir, ".nojekyll"), "", "utf8");
 
 const esc = (value = "") => String(value)
@@ -33,7 +35,8 @@ const esc = (value = "") => String(value)
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;");
 
-const imageSrc = (src, base) => /^https?:\/\//.test(src) ? src : `${base}assets/${src.replace(/^\.\//, "")}`;
+const assetSrc = (src, base) => /^https?:\/\//.test(src) ? src : `${base}assets/${src.replace(/^\.\//, "")}`;
+const imageSrc = assetSrc;
 
 function head({ title, description, base }) {
   return `
@@ -163,9 +166,9 @@ function projectPage(project, index) {
   let content;
   if (project.sections) {
     const beats = project.sections.map((section, i) => `<section class="story-beat"><div class="story-label">0${i + 1} / ${esc(section.label)}</div><h2>${esc(section.title)}</h2><p>${esc(section.body)}</p>${(i === 0 || i === 2) ? campaignImage(project.images[i === 0 ? 1 : 2], `${project.title} · Campaign image ${i === 0 ? "01" : "02"}`, "../../", "story-image") : ""}${i === 1 ? `<div class="story-pause" aria-hidden="true"><span>${esc(project.shortTitle)}</span></div>` : ""}</section>`).join("");
-    content = `${overview}<div class="case-story">${beats}</div><section class="case-deliverables"><div class="story-label">The build</div><h2>From thought<br>to touchpoint.</h2><ul>${project.deliverables.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></section><section class="reflection"><span>Reflection</span><blockquote>“${esc(project.reflection)}”</blockquote></section><a class="source-credit" href="${esc(project.canvaUrl)}" target="_blank" rel="noreferrer">View original source presentation ↗</a>`;
+    content = `${overview}<div class="case-story">${beats}</div><section class="case-deliverables"><div class="story-label">The build</div><h2>From thought<br>to touchpoint.</h2><ul>${project.deliverables.map((item) => `<li>${esc(item)}</li>`).join("")}</ul></section><section class="reflection"><span>Reflection</span><blockquote>“${esc(project.reflection)}”</blockquote></section><a class="source-credit" href="${esc(assetSrc(project.sourcePdf, "../../"))}" target="_blank" rel="noreferrer" type="application/pdf">Open project PDF ↗</a>`;
   } else {
-    content = `<section class="source-note"><div class="story-label">Source note</div><h2>This story is still<br>being edited.</h2><p>The original presentation is preserved as the source of truth. Strategic details will appear here only after they have been reviewed and rewritten—never invented to fill a page.</p><a class="source-button" href="${esc(project.canvaUrl)}" target="_blank" rel="noreferrer">View source presentation ↗</a></section><section class="placeholder-gallery">${campaignImage(project.images[1], `${project.title} · Campaign image 01`, "../../")}${campaignImage(project.images[2], `${project.title} · Campaign image 02`, "../../")}</section>`;
+    content = `<section class="source-note"><div class="story-label">Source note</div><h2>This story is still<br>being edited.</h2><p>The original presentation is preserved as the source of truth. Strategic details will appear here only after they have been reviewed and rewritten—never invented to fill a page.</p><a class="source-button" href="${esc(assetSrc(project.sourcePdf, "../../"))}" target="_blank" rel="noreferrer" type="application/pdf">Open project PDF ↗</a></section><section class="placeholder-gallery">${campaignImage(project.images[1], `${project.title} · Campaign image 01`, "../../")}${campaignImage(project.images[2], `${project.title} · Campaign image 02`, "../../")}</section>`;
   }
   const body = `<main class="case-page case-${project.visual}"><header class="case-hero"><div class="case-topline"><a href="../../archive/index.html">← Campaign archive</a><span>${project.index} / ${projects.length}</span></div><div class="case-kicker">${esc(project.category)}${project.year ? ` · ${esc(project.year)}` : ""}</div><h1>${esc(project.title)}</h1><p>${esc(project.subtitle)}</p><div class="case-visual-stack">${campaignImage(project.images[0], `${project.title} · Hero image`, "../../", "case-cover-image", true)}${projectVisual(project)}</div></header>${content}<nav class="case-next"><a href="../${previous.slug}/index.html"><span>Previous</span><strong>${esc(previous.title)}</strong></a><a href="../${next.slug}/index.html"><span>Next story</span><strong>${esc(next.title)} →</strong></a></nav></main>`;
   return pageShell({ title: `${project.title} — Jiaxin Zhang`, description: project.subtitle, base: "../../", bodyClass: `case-static case-${project.visual}`, body });
